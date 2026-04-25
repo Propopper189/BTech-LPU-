@@ -1,0 +1,78 @@
+ip a
+ip r
+sudo nano /etc/netplan/01-network-manager-all.yaml
+sudo netplan apply
+sudo systemctl restart NetworkManager
+
+hostname --fqdn
+sudo nano /etc/hosts
+sudo hostnamectl set-hostname cloud
+hostname --fqdn
+
+sudo apt install bridge-utils
+sudo brctl addbr cloudbr0
+sudo btctl addif cloudbr0 ens33
+sudo nano /etc/netplan/01-network-manager-all.yaml
+{open LPU LIVE and paste code here}
+sudo netplan apply
+sudo systemctl restart NetworkManager
+
+
+sudo apt install ntp
+sudo systemctl enable ntp
+sudo systemctl start ntp
+
+sudo apt install chrony
+sudo systemctl enable chrony
+sudo systemctl start chrony 
+
+sudo apt install openjdk-11-jdk
+
+
+sudo nano /etc/apt/sources.list.d/cloudstack.list
+
+     deb https://download.cloudstack.org/ubuntu focal 4.18
+
+wget -O - https://download.cloudstack.org/release.asc |sudo tee /etc/apt/trusted.gpg.d/cloudstack.asc
+
+sudo apt update
+
+sudo apt install cloudstack-management 
+
+ sudo apt install mysql-server
+
+
+sudo nano /etc/mysql/my.cnf 
+
+
+[mysqld]
+server-id=1
+innodb_rollback_on_timeout=1
+innodb_lock_wait_timeout=600
+max_connections=350
+log-bin=mysql-bin
+binlog-format = 'ROW'
+
+
+
+sudo systemctl restart MySQL
+
+sudo mysql_secure_installation 
+
+sudo MySQL
+
+CREATE DATABASE `cloud`;
+CREATE DATABASE `cloud_usage`;
+
+CREATE USER cloud@'localhost' identified by '123@Msql'; 
+CREATE USER cloud@'%' identified by '1234@Sql'; 
+GRANT ALL ON cloud.* to cloud@`localhost`; 
+
+GRANT ALL ON cloud.* to cloud@`%`;
+GRANT ALL ON cloud_usage.* to cloud@`localhost`; 
+
+
+GRANT ALL ON cloud_usage.* to cloud@`%`; 
+GRANT process ON *.* TO cloud@`localhost`;
+GRANT process ON *.* TO cloud@`%`; 
+

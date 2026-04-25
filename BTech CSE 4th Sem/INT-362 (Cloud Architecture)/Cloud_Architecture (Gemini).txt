@@ -1,0 +1,311 @@
+Practical - 1
+----------------------------------------------------
+Snapshot
+For saving the current state of the guest operating system.
+We can save the state of the guest OS and use it later according to our need.
+
+Steps : 
+VM on top of VMWARE (while the guest OS is on)
+Snapshot
+Take snapshot
+
+Practical - 2
+-----------------------------------------------------
+Clone
+
+A. Linked Clone
+A copy of the guest OS is created, and both the Clone and the Original Guest OS will be using the same resources.
+*(Requires less space)
+
+B. Full Clone
+A copy of the guest OS is created, and the Clone and the Original Guest OS will be completely independent (means they will be having their own independent resources).
+*(Requires more space)
+
+*Right Click on the guest OS -> Manage -> Clone -> Linked/Full Clone.
+
+Practical - 3
+------------------------------------------------------
+Export to OVF [Open Virtualization Format: A standard file format used to package and share virtual machines]
+
+It is used for creating a file (OVF) which stores the state of the system (files and folders) which you can share to your friends so that they can have the same files and folders which you had in your guest OS (use Open a virtual machine on VMware dashboard).
+
+** There are 3 network adapters
+	1. NAT [Network Address Translation: Translates private IP addresses to a public one]
+	-> The host system (VMware's NAT service) behaves like a router, means first the packet from the guest OS is sent to the VMware's NAT service which use the host IP to access the internet.
+	2. Bridge 
+	-> Virtual Machine acts as a separate device (means a new ip will be assigned to the virtual machine using DHCP [Dynamic Host Configuration Protocol: Automatically assigns IP addresses]). 
+	3. Host-Only
+	-> Host-Only adapter creates a private virtual network which allows communication between the virtual machine and the host only (No internet access by default).
+
+VMnet8 → Used for NAT → Internet access (via host)
+VMnet1 → Used for Host-Only → Host ↔ VM communication only
+
+Practical 4
+----------------------------------------------------------
+1. Bridged Mode
+Ping [Packet Internet Groper: A tool to test network connection]: Default gateway of host Wi-Fi
+Reason: VM is on the same network as the host and uses the same router
+
+2. NAT Mode
+Ping: Host IP address or any website (e.g., google.com)
+Reason: VM accesses the internet through the host’s IP using VMware NAT service
+
+3. Host-Only Mode
+Ping: Host IP address
+Reason: Only Host ↔ VM communication is allowed; no internet access
+
+Practical 5
+-----------------------------------------------------------
+*Apache Cloud Stack Installation*
+
+*Static Ip in Ubuntu (commands)
+
+-> ip a [Shows the IP address of your system]
+-> ip r [Shows the router/gateway address]
+-> sudo nano /etc/netplan/01-network-manager-all.yaml [Opens the network configuration file in the 'nano' text editor with admin rights]
+		->paste and make changes according to your system
+			network:
+ 			version: 2
+ 			renderer: NetworkManager
+			 ethernets:
+			   eth0: ->change according to your system (ens33)
+			     dhcp4: no
+			     addresses: [172.23.207.254/20]  -> change according to the system "ip a" (then inet will tell you the address)
+			     gateway4: 192.168.1.1  -> change according to the system "ip r" (then default via will be the gateway)
+			     nameservers:
+			         addresses: [8.8.8.8,8.8.8.4]
+
+-> sudo netplan apply [Applies the new network settings immediately]
+-> sudo systemctl restart NetworkManager [Restarts the network service to ensure settings take effect]
+
+*Set Host Name
+----------------------------------------------------------
+-> hostname --fqdn [Shows the complete network name of the computer; FQDN = Fully Qualified Domain Name]
+-> sudo nano /etc/hosts [Opens the file that links IP addresses to readable computer names]
+	-> {in 3rd line add this} "ip_address fully_qualified_domain_name hostname" / "192.168.72.128 apache.cloud.u1 cloud" -> (192.168.72.128/24 is wrong) 
+-> sudo hostnamectl set-hostname cloud [Changes the computer's internal name to 'cloud']
+-> hostname --fqdn  -> the output should be same as fully_qualified_domain_name
+-> hostname -> the output should be same as hostname.
+
+*Bridge configuration (commands)
+----------------------------------------------------------
+-> sudo apt install bridge-utils [Installs tools to create virtual network bridges; APT = Advanced Package Tool]
+
+-> sudo brctl addbr cloudbr0 [Creates a new network bridge named 'cloudbr0']
+-> sudo brctl addif cloudbr0 ens33 [Connects your physical network interface like 'ens33' to the virtual bridge]
+-> sudo nano /etc/netplan/01-network-manager-all.yaml [Opens network config to add bridge settings]
+	-> {paste code here for CloudBr0}.
+network:
+    version: 2
+    renderer: networkd
+    ethernets:
+        ens33: -> change according to your system (ip a)
+            dhcp4: no
+            dhcp6: no
+
+    bridges:
+        cloudbr0:
+            interfaces: [ens33]  -> change according to your system (ip a)
+            dhcp4: no
+            dhcp6: no
+            addresses: [192.168.72.128/24] -> change according to your system (ip a)
+            gateway4: 192.168.72.2 -> change according to your system (ip r)
+            nameservers:
+                addresses: [8.8.8.8, 8.8.4.4]
+-> sudo netplan apply [Applies the new bridge settings]
+-> sudo systemctl restart NetworkManager [Restarts the network service]
+
+*NTP [Network Time Protocol: Syncs computer clocks over a network]
+- It makes sure your system clock is accurate by syncing it with a time server (like atomic clocks or internet time servers).
+- It is basically used to set the correct time of the system.
+
+-> sudo apt install ntp [Installs the NTP software]
+-> sudo systemctl enable ntp [Sets NTP to turn on automatically every time the computer boots]
+-> sudo systemctl start ntp [Turns on the NTP service right now]
+
+*Chrony [A modern, faster version of NTP]
+
+-> sudo apt install chrony [Installs the Chrony time sync software]
+-> sudo systemctl enable chrony [Sets Chrony to start on boot]
+-> sudo systemctl start chrony [Turns on the Chrony service]
+
+Note : Chrony and NTP can not be used simultaneously.
+
+-> sudo apt install openjdk-11-jdk [Installs Java, which CloudStack requires to run; JDK = Java Development Kit]
+
+-> sudo nano /etc/apt/sources.list.d/cloudstack.list [Creates a file telling the system where to download CloudStack]
+	-> deb https://download.cloudstack.org/ubuntu focal 4.18   (paste this in the editor)
+		-> (deb) Means Debian package repository
+	    	-> It tells APT that this repo provides .deb packages
+		-> https://download.cloudstack.org/ubuntu -> This is the repository URL
+		-> focal -> Ubuntu 20.04 LTS codename
+		-> 4.18 -> CloudStack version
+
+-> wget -O - https://download.cloudstack.org/release.asc | sudo tee /etc/apt/trusted.gpg.d/cloudstack.asc [Downloads the security key to prove the CloudStack download is safe and official]
+
+-> sudo apt update [Refreshes your system's list of available software]
+-> sudo apt install cloudstack-management [Installs the main server software that controls CloudStack]
+-> sudo apt install mysql-server [Installs the database software to store CloudStack's data]
+
+-> sudo nano /etc/mysql/my.cnf [Opens the database settings file to tweak performance parameters]
+	-> [mysqld]
+	-> server-id=1
+	-> innodb_rollback_on_timeout=1
+	-> innodb_lock_wait_timeout=600
+	-> max_connections=350
+	-> log-bin = mysql-bin
+	-> binlog-format=ROW
+
+-> sudo systemctl restart mysql [Restarts the database to apply your tweaks]
+-> sudo mysql_secure_installation [Runs a setup script to lock down your database with a password]
+
+-> sudo mysql [Opens the database command-line tool]
+	create database name_of_database;
+	show databases;  - to get the list of databases
+	use name_of_database;
+	create table name_of_table(name_of_arg datatype(length), name_of_arg data_type(length));
+	insert into student values(11, 'Rohan');
+	select * from student; - * means all columns
+	drop table student; - delete table named student
+
+-> mysql >> create database cloud;
+-> create database cloud_usage;
+-> CREATE USER 'cloud'@'localhost' IDENTIFIED BY '123@Mysql';
+-> CREATE USER 'cloud'@'%' IDENTIFIED BY 'Cloud@1234';
+-> grant all on cloud .* to cloud@'localhost';
+-> grant all on cloud .* to cloud@'%';
+
+-> grant all on cloud_usage .* to cloud@'localhost';
+-> grant all on cloud_usage .* to cloud@'%';
+
+-> GRANT PROCESS ON *.* TO 'cloud'@'localhost';
+-> grant process on *.* to cloud@'%';
+
+Three types of backups is there, 
+1) STATEMENT
+2) ROW
+3) MIXED
+
+-> sudo cloudstack-setup-databases cloud:123@Mysql@localhost --deploy-as=root [Connects CloudStack to the MySQL database you just made]
+
+-> sudo cloudstack-setup-management [Configures the CloudStack management server]
+-> sudo systemctl enable cloudstack-management [Sets CloudStack to start on boot]
+-> sudo systemctl start cloudstack-management [Starts CloudStack right now]
+-> sudo ufw allow mysql [Opens a hole in your firewall so CloudStack can talk to the database; UFW = Uncomplicated Firewall]
+-> sudo mkdir -p /export/primary [Creates a folder for primary storage; '-p' means it won't throw an error if the folder already exists]
+-> sudo mkdir -p /export/secondary [Creates a folder for secondary storage]
+-> sudo nano /etc/exports [Opens the file used to share folders over the network]
+	-> Copy paste this : 
+	-> /export *(rw,async,no_root_squash,no_subtree_check)    (rw = read_write, async = asynchronization, no_root_squash = accessible as a user only and not as a root admin, no_subtree_check = the user will not be able to check for other users).
+	-> sudo apt install nfs-kernel-server [Installs the software needed to share files over the network; NFS = Network File System]
+	-> sudo mkdir -p /mnt/primary [Creates a folder where the shared primary storage will be attached]
+	-> sudo mkdir -p /mnt/secondary [Creates a folder for attached secondary storage]
+	-> sudo chmod 777 /etc/fstab [Gives everyone full read, write, and execute permissions to the file system table; fstab = File System Table]
+	-> sudo echo "192.168.72.128:/export/primary /mnt/primary nfs rsize=8192,wsize=8192,timeo=14,intr,noauto 0 2">> /etc/fstab  (rsize, wsize = read/write size | timeo = timeout | intr = interrupt | no auto 0 2 = backup when system starts, no auto 0 1 = keep backup when system off, no auto 0 0 = no backup)
+	-> sudo echo "192.168.72.128:/export/secondary /mnt/secondary nfs rsize=8192,wsize=8192,timeo=14,intr,noauto 0 2">> /etc/fstab [Adds a line to automatically connect to the network storage when the computer turns on]
+	-> sudo journalctl -xeu cloudstack-agent [Shows detailed error logs specifically for the CloudStack agent to help troubleshoot]
+	-> sudo nano /etc/fstab
+	-> sudo mount /mnt/primary [Connects the primary network folder to your system]
+	-> sudo mount /mnt/secondary [Connects the secondary network folder to your system]
+	-> sudo exportfs -a [Officially shares all the folders you listed in the /etc/exports file]
+	-> sudo systemctl restart nfs-kernel-server [Restarts the file-sharing service to apply changes]
+-> To see the output :
+	-> sudo systemctl start cloudstack-management
+	open firefox and enter this url : 
+	-> 192.168.72.128:8080/ ("ip_address:8080")
+
+*We need a fresh Ubuntu for CA-1*
+
+CloudStack Dashboard Tabs:
+template tab - we can select operating systems from the list.
+iso tab - if the required OS is not available in the template tab, we can install it in iso tab.
+instance tab - start/stop/terminate any virtual machine.
+storage - for configuration of primary and secondary storage
+event tab - history of events
+account tab - for creating users
+domain (for grouping) - for grouping users
+infrastructure tab - for configuration of zone, pod and cluster
+project tab - for creating 3 things, user, grouping and permissions.
+network tab - firewall option is there, we can assign the port numbers in the network tab, load balancing is also there in the network tab.
+
+load balancing - 1. Round Robbin Method
+		 2. Weighted Round Robbin Method
+		 3. Least Connection Method
+		 4. Weighted List Connection
+		 5. Least Response Time
+
+Practical 5 (Continued)
+---------------------------------------------------
+KVM Installation [Kernel-based Virtual Machine: Turns Linux into a hypervisor to run VMs]
+---------------------------------------------------
+
+We have installed apache cloud stack on that 2 virtual machines are running (on apache cloudstack) KVM manages both the virtual machines.
+
+Setup nested virtualization in VMWare Workstation
+
+0. Go to windows features on or off (Search in windows search).
+1. Enable Hyper-V.
+2. Disable Virtual Machine Platform.
+3. Disable Windows Hypervisor Platform.
+4. Turn Off memory integrity in windows security.
+
+0. Shut Down the Virtual Machine.
+1. Navigate to the VM Setting - Hardware page for the VM you would like to edit.
+2. Click edit in the Guest OS settings section. (Go to processor)
+3. Click the checkbox for Enable nested virtualization. (Turn on Virtualize Intel VT-x/EPT or AMD-V/RVI).
+
+Change Password
+--------------------------------------------------------
+-> sudo su [Switches your session to the superuser/root admin account]
+-> su root [Another way to switch to the root user]
+-> passwd root [Changes the password for the root user]
+---------------------------------------------------------------------------------------------------------------------
+
+-> sudo apt-get install quota [Installs a tool to limit how much hard drive space users can take up]
+-> sudo apt-get install openssh-server [Installs SSH so you can safely control this computer remotely; SSH = Secure Shell]
+-> sudo sed -i "s/#PermitRootLogin.*/PermitRootLogin yes /" /etc/ssh/sshd_config  [Finds and replaces text to allow the root admin to log in remotely; sed = Stream Editor, -i = edit in-place]
+-> sudo sed -i -e 's/^RPCMOUNTDOPTS="--manage-gids"$/RPCMOUNTDOPTS="-p 892 -- manage-gids"/g' /etc/default/nfs-kernel-server [Assigns a specific port number for network file sharing groups]
+
+-> sudo sed -i -e 's/^STATDOPTS=$/STATDOPTS="--port 662 --outgoing-port 2020"/g' /etc/default/nfs-common [Assigns specific network ports so the firewall doesn't block file sharing]
+-> echo "NEED_STATD=yes" >> /etc/default/nfs-common [Tells the system it needs the status-tracking service for file sharing]
+-> sudo sed -i -e 's/^RPCRQUOTADOPTS=$/RPCRQUOTADOPTS="-p 875"/g' /etc/default/quota [Assigns a specific port to the quota tracking tool]
+
+-> sudo apt install cloudstack-agent [Installs the worker software that lets the main CloudStack server control this KVM machine]
+--------------------------------------------------------------------------------------------------------------------- (*Till here its compulsory*)
+
+-> sudo sed -i -e 's/\#vnc_listen.*$/vnc_listen = "0.0.0.0"/g' /etc/libvirt/qemu.conf [Allows remote screen viewing from any IP address; VNC = Virtual Network Computing]
+-> sudo sed -i -e 's/.*libvirtd_opts.*/libvirtd_opts="-l"/' /etc/default/libvirtd [Tells the virtualization service to listen for incoming network connections]
+-> sudo echo LIBVIRTD_ARGS=\"--listen\" >> sudo  /etc/default/libvirtd [Another way to enforce the listening rule above]
+-> sudo systemctl mask libvirtd.socket libvirtd-ro.socket libvirtd-admin.socket libvirtd-tls.socket libvirtd-tcp.socket [Completely blocks these old connection methods so they don't interfere with your new settings]
+-> sudo systemctl restart libvirtd [Restarts the virtualization service]
+-> sudo nano /etc/default/libvirtd  (comment the second uncommented line)
+-> sudo systemctl restart libvirtd 
+-> sudo echo 'listen_tls=0' >> sudo /etc/libvirt/libvirtd.conf  [Turns off encrypted TLS connections for this local lab setup; TLS = Transport Layer Security]
+-> sudo echo 'listen_tcp=1' >> sudo /etc/libvirt/libvirtd.conf  [Turns on standard, unencrypted TCP connections; TCP = Transmission Control Protocol]
+-> sudo echo 'tcp_port = "16509"' >> sudo  /etc/libvirt/libvirtd.conf [Sets the exact port number for the TCP connection]
+-> sudo echo 'mdns_adv = 0' >> sudo /etc/libvirt/libvirtd.conf [Turns off automatic network broadcasting so your VM doesn't announce itself]
+-> sudo echo 'auth_tcp = "none"' >> sudo /etc/libvirt/libvirtd.conf [Removes the password requirement for the TCP connection inside this lab]
+-> sudo systemctl restart libvirtd
+-> apt-get install uuid [Installs a tool to create unique ID tags; UUID = Universally Unique Identifier]
+-> apt-get install uuid –y
+-> UUID=$(uuid) [Generates a new ID and saves it in a temporary variable named UUID]
+-> sudo echo host_uuid = \"$UUID\" >> sudo /etc/libvirt/libvirtd.conf [Writes that unique ID into the configuration file]
+-> sudo systemctl restart libvirtd [Restarts the service again]
+-> sudo ln -s /etc/apparmor.d/usr.lib.libvirt.virt-aa-helper /etc/apparmor.d/disable/ [Creates a shortcut that tells the Linux security system to disable checks on this specific virtualization helper tool]
+-> sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.libvirtd  [Removes the security profile for the main virtualization service so it runs without restriction]
+-> sudo apparmor_parser -R /etc/apparmor.d/usr.lib.libvirt.virt-aa-helper [Removes the security profile for the helper tool]
+-> exit [Logs you out of the root user account]
+
+
+If there is any error (when cloudstack stops working)
+--------------------------------------------------------
+-> sudo nano /etc/cloudstack/management/db.properties [Opens the file where CloudStack stores its database login info]
+	-> Node ip :- Your ip address
+	-> Password :- password
+-> sudo cloudstack-setup-management [Re-runs the setup to fix the connection]
+
+Installation of apache cloudStack : 
+-------------------------------------------
+1. Static IP.
+2. Host Name (giving one name for the static ip).
+3. Bridge Configuration.
