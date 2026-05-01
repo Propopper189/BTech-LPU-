@@ -10,6 +10,7 @@ public class Program3 {
 
         ArrayList<Integer> li1 = new ArrayList<>(Arrays.asList(arr1));
         ArrayList<Integer> li2 = new ArrayList<>(Arrays.asList(arr2));
+        ArrayList<Integer> li3 = new ArrayList<>(Arrays.asList(1, 3, 4, 7)); // another method to create arraylist.
 
         // for(int j : li2)
         // {
