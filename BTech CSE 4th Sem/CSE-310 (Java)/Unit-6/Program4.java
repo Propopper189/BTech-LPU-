@@ -11,7 +11,7 @@ public class Program4 {
 
         ArrayList<Integer> li1 = new ArrayList<>(Arrays.asList(arr1));
         ArrayList<Integer> li2 = new ArrayList<>(Arrays.asList(arr2));
-
+        
         li1.addAll(li2);
         Collections.sort(li1);
         System.out.println(li1);
