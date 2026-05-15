@@ -18,12 +18,17 @@ public class practice4 {
         for(;;)
         {
             int j = 1;
-            System.out.println("Ran");
+            System.out.println("Ran Infinite");
             j += 1;
             if(j == 2)
             {
                 break;
             }
+        }
+        int arr[] = {1, 3, 4};
+        for(int k : arr)
+        {
+            System.out.print(k + " ");
         }
     }
 }
