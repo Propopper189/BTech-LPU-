@@ -1,0 +1,42 @@
+Practical 1
+---------------
+
+AWS price calculator
+
+(fill the steps)
+
+----------------
+
+Practical 2
+---------------
+
+Creating IAM User
+
+1. Go to IAM.
+2. Go to users under access management (You can create individual user accounts for people who need access to your AWS resources)
+3. Create User
+4. Give the name to the user.
+5. Add user to the user group and give permissions.
+
+
+--------------
+3 Fundamental drivers of cost with AWS
+
+1. Compute - Charged per hour, varies by instance type.
+2. Compute - Charged typically per GB.
+3. Data transfer - Outbound is charged.
+
+How do you pay for AWS
+
+1. Pay what you use.
+2. Pay less when you reserve.
+3. Pay less when you use more and as AWS grows.
+	-> Number of customers increased, Price gets less.
+
+--------------
+Practical 3
+--------------
+
+Creating an Instance (EC2 Sessions)
+
+-> Instance type - Linux, Mac, Windows etc.
