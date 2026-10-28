@@ -1,0 +1,39 @@
+I want to score **100% marks** in **[WRITE UNIT NAME HERE]**.
+
+**Unit name:** __________
+
+**Topics included in this unit:**
+- __________
+- __________
+- __________
+- __________
+- __________
+
+**My notes/material:** I am attaching my existing notes, PPTs, PDFs, or other study material. Use these as the main source.
+
+Generate the **most efficient, easiest, simplest, and exam-focused notes** for me.
+
+**Follow ALL these instructions:**
+
+1. **Explain everything** included in the given topics and my uploaded material. Do not skip any important definition, formula, algorithm, step, case, example, or exam-relevant point.
+2. Use the **simplest and easiest words possible**. Assume I know nothing about the topics.
+3. Use **direct wording** wherever possible. Avoid complicated sentences, unnecessary explanations, and difficult vocabulary.
+4. Keep the notes **short, compact, and notebook-friendly** because I will handwrite them in my notebook.
+5. Include everything important, but remove unnecessary information, repeated points, lengthy introductions, and extra theory.
+6. Make every topic easy to understand and remember. Explain difficult concepts using simple examples or analogies only when necessary.
+7. Include all important **definitions, formulas, algorithms, pseudocode, recurrence relations, base cases, steps, worked examples, and time and space complexities**, wherever applicable to the syllabus.
+8. For numerical or problem-solving topics, show the **simplest step-by-step solving method** with at least one important worked example wherever needed. Do not skip steps that are necessary to solve exam questions.
+9. For algorithms, write clear, short, exam-ready pseudocode wherever applicable. Include the logic and important steps so I can reproduce the algorithm in the exam.
+10. Highlight important differences, conditions, special cases, common mistakes, and facts that are easy to confuse in MCQs or written exams.
+11. Include important exam-oriented points that can help me answer both theoretical and numerical questions correctly.
+12. Use headings, subheadings, bullet points, and compact tables wherever useful.
+13. **Do not leave extra blank lines between topics.** Keep the formatting tight, clean, and easy to copy into my notebook.
+14. Do not make the notes unnecessarily long. I do not want to tire myself out while writing or learning them.
+15. Do not make the notes so short that important information is lost. Maintain the best balance between **minimum writing and maximum marks**.
+16. Follow the terminology, organization, and content of my uploaded study material. If something important is missing from the material but is explicitly included in the syllabus, cover it. Clearly identify any additional information instead of silently replacing my material.
+17. At the end, provide a **compact last-minute revision sheet** containing the most important formulas, algorithms, recurrence relations, base cases, complexities, and facts.
+18. Also provide a **final exam checklist** of the concepts, formulas, algorithms, and numerical problems I must know before the exam.
+
+**My ultimate goal:** Prepare the most efficient notes possible so that I can understand the entire unit from scratch, revise quickly, solve exam questions confidently, and aim for **100% marks**.
+
+**Important:** Do not give me a lengthy textbook explanation. Give me direct, easy-to-understand, complete, high-scoring notes that I can comfortably handwrite and revise.
